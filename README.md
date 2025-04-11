@@ -1,3 +1,4 @@
+![logo](https://github.com/user-attachments/assets/ffce45b2-bd9f-4908-a67c-182b1c9beef9)
 
 # Pascaline - A Python Superset
 
