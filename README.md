@@ -100,7 +100,7 @@ Pascaline is open-source and released under the MIT License. See the [LICENSE](L
 
 ## Links
 
-Currently no links. Coming soon though
+[Website](https://diamsystems.odoo.com/pascaline)
 
 ---
 
