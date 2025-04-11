@@ -1,0 +1,259 @@
+// !/usr/bin/env python3.12
+"""
+Pascaline Transpiler 1.0.0
+(c) 2025 diam Systems Ltd. All rights reserved.
+A robust transpiler for converting Pascaline (.pasc) code to Python 3.12,
+compiling it to bytecode (.pyc) and running it, along with a reverse
+transpilation mode and a professional CLI interface.
+"""
+
+use os
+use sys
+use re
+use shutil
+use subprocess
+use argparse
+use logging
+use py_compile
+
+// Configure logging.
+logging.basicConfig(
+    level=logging.INFO,
+    format="[Pascaline] %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+VERSION = "1.0.0"
+PY_VERSION = "3.12"
+COPYRIGHT = "© 2025 diam Systems Ltd. All rights reserved."
+
+// ----------------------------------------------------------------------
+// Transpilation and Reverse Transpilation Functions
+// ----------------------------------------------------------------------
+
+fun transpile_code(source):
+    """
+    Converts Pascaline source into valid Python code.
+    Mappings:
+      - 'fun' at start of line -> 'def'
+      - 'use' at start of line -> 'import'
+      - 'echo(' -> 'echo('
+      - '=>' -> '=>'
+      // ' comments
+    """
+    try:
+        code = re.sub(r'^(?P<indent>\s*)fun\b', r'\g<indent>def', source, flags=re.MULTILINE)
+        code = re.sub(r'^(?P<indent>\s*)use\b', r'\g<indent>import', code, flags=re.MULTILINE)
+
+        fun convert_comment(match):
+            before = match.group(1)
+            comment = match.group(2)
+            // {comment.strip()}"
+        code = re.sub(r'(^\s*).*//(.*)$', convert_comment, code, flags=re.MULTILINE)
+
+        code = re.sub(r'\becho\(', 'echo(', code)
+        code = re.sub(r'=>', '=>', code)
+        => code
+    except Exception as e:
+        logger.error(f"Error during transpiling: {e}")
+        sys.exit(1)
+
+fun reverse_transpile_code(source):
+    """
+    Converts Python code into Pascaline syntax.
+    Reverse mappings:
+      - 'def' at start of line -> 'fun'
+      - 'import' at start of line -> 'use'
+      - 'echo(' -> 'echo('
+      - '=>' -> '=>'
+      // ' comments -> '//'
+    """
+    try:
+        code = re.sub(r'^(?P<indent>\s*)def\b', r'\g<indent>fun', source, flags=re.MULTILINE)
+        code = re.sub(r'^(?P<indent>\s*)import\b', r'\g<indent>use', code, flags=re.MULTILINE)
+
+        fun convert_py_comment(match):
+            before = match.group(1)
+            comment = match.group(2)
+            => f"{before}// {comment.strip()}"
+        // (.*)$', convert_py_comment, code, flags=re.MULTILINE)
+
+        code = re.sub(r'\bprint\(', 'echo(', code)
+        code = re.sub(r'\breturn\b', '=>', code)
+        => code
+    except Exception as e:
+        logger.error(f"Error during reverse transpiling: {e}")
+        sys.exit(1)
+
+fun process_file(input_path, output_path, reverse=False):
+    """
+    Reads a source file, processes it (either transpile or reverse), 
+    and writes the result to the output file.
+    """
+    try:
+        with open(input_path, 'r', encoding='utf-8') as infile:
+            source = infile.read()
+    except UnicodeDecodeError:
+        try:
+            with open(input_path, 'r', encoding='latin-1') as infile:
+                source = infile.read()
+        except Exception as e:
+            logger.error(f"Error reading file {input_path}: {e}")
+            sys.exit(1)
+
+    processed = reverse_transpile_code(source) if reverse else transpile_code(source)
+    try:
+        with open(output_path, 'w', encoding='utf-8') as outfile:
+            outfile.write(processed)
+        logger.info(f"Processed: {input_path} -> {output_path}")
+    except Exception as e:
+        logger.error(f"Error writing to file {output_path}: {e}")
+        sys.exit(1)
+
+// ----------------------------------------------------------------------
+// Project Build Logic
+// ----------------------------------------------------------------------
+
+fun build_project(source_root, build_root, reverse=False):
+    """
+    Builds the entire project by walking through the source directory
+    and either transpiling or copying files based on the reverse flag.
+    """
+    try:
+        for dirpath, _, filenames in os.walk(source_root):
+            target_dir = dirpath if reverse else os.path.join(build_root, os.path.relpath(dirpath, source_root))
+            os.makedirs(target_dir, exist_ok=True)
+
+            for filename in filenames:
+                src_file = os.path.join(dirpath, filename)
+                if not reverse and filename.endswith('.pasc'):
+                    base = os.path.splitext(filename)[0]
+                    target_file = os.path.join(target_dir, base + '.py')
+                    process_file(src_file, target_file, reverse=False)
+                elif reverse and filename.endswith('.py'):
+                    base = os.path.splitext(filename)[0]
+                    target_file = os.path.join(target_dir, base + '.pasc')
+                    process_file(src_file, target_file, reverse=True)
+                elif not reverse and filename.endswith('.py'):
+                    target_file = os.path.join(target_dir, filename)
+                    shutil.copy2(src_file, target_file)
+                    logger.info(f"Copied: {src_file} -> {target_file}")
+    except Exception as e:
+        logger.error(f"Error during project build: {e}")
+        sys.exit(1)
+
+// ----------------------------------------------------------------------
+// Compile and Execute Logic (Python 3.12)
+// ----------------------------------------------------------------------
+
+fun compile_and_run(build_root, main_relative_path, extra_args=None):
+    """
+    Compiles the transpiled Python code into bytecode and runs it.
+    """
+    main_py_path = os.path.join(build_root, main_relative_path)
+    logger.info(f"Compiling {main_py_path} to bytecode...")
+    try:
+        compiled_path = py_compile.compile(main_py_path, cfile=main_py_path + "c", doraise=True)
+    except py_compile.PyCompileError as e:
+        logger.error(f"Compilation error: {e}")
+        sys.exit(1)
+
+    // Prepare the command to run the bytecode
+    command = ['python3.12', compiled_path]
+    
+    // We check if extra_args is provided and ensure the first argument is the command
+    if extra_args:
+        // We assume the first argument will be the command (run/reverse/info)
+        command.extend(extra_args)
+
+    logger.info(f"Running compiled bytecode: {' '.join(command)}")
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Execution error: {e}")
+        sys.exit(1)
+
+// ----------------------------------------------------------------------
+// CLI Interface
+// ----------------------------------------------------------------------
+
+fun print_info():
+    """
+    Prints information about the transpiler.
+    """
+    echo(f"""
+Pascaline Transpiler {VERSION}
+Built on Python {PY_VERSION}
+A robust transpiler for converting Pascaline (.pasc) code to Python 3.12 bytecode.
+{COPYRIGHT}
+Visit: https://diamsystems.odoo.com/pascaline
+""")
+
+fun main():
+    """
+    Main entry point for the command-line interface.
+    """
+    parser = argparse.ArgumentParser(
+        description="Pascaline Transpiler - Convert Pascaline code to Python 3.12 bytecode.",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument("--version", action="version", version=f"Pascaline Transpiler {VERSION}")
+    subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
+
+    run_parser = subparsers.add_parser("run", help="Transpile .pasc files, compile and run using Python 3.12")
+    run_parser.add_argument("mainfile", help="Path to the main .pasc file")
+    run_parser.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for the transpiled program")
+
+    reverse_parser = subparsers.add_parser("reverse", help="Reverse transpile .py files to .pasc")
+    reverse_parser.add_argument("mainfile", help="Path to the main .py file to reverse transpile")
+
+    info_parser = subparsers.add_parser("info", help="Display transpiler info")
+
+    args = parser.parse_args()
+
+    if args.command == "info":
+        print_info()
+        sys.exit(0)
+
+    if args.command == "reverse":
+        mainfile = os.path.abspath(args.mainfile)
+        if not mainfile.endswith('.py'):
+            logger.error("Error: Must provide a '.py' file for reverse transpilation.")
+            sys.exit(1)
+        source_root = os.path.dirname(mainfile)
+        logger.info("Starting reverse transpilation...")
+        build_project(source_root, build_root=source_root, reverse=True)
+        logger.info("Reverse transpilation complete.")
+        sys.exit(0)
+
+    if args.command == "run":
+        mainfile = os.path.abspath(args.mainfile)
+        if not mainfile.endswith('.pasc'):
+            logger.error("Error: Must provide a '.pasc' file for run mode.")
+            sys.exit(1)
+        source_root = os.path.dirname(mainfile)
+        rel_main = os.path.relpath(mainfile, source_root).replace('.pasc', '.py')
+        build_root = os.path.join(source_root, ".pasc_build")
+        if os.path.exists(build_root):
+            shutil.rmtree(build_root)
+        os.makedirs(build_root, exist_ok=True)
+
+        logger.info("Transpiling project files into build directory...")
+        build_project(source_root, build_root, reverse=False)
+        logger.info("Transpilation complete.")
+
+        // Get extra arguments (they should be passed after the `--` flag)
+        extra_args = args.extra_args
+
+        compile_and_run(build_root, rel_main, extra_args)
+
+        logger.info("Execution finished. Cleaning up...")
+        shutil.rmtree(build_root)
+        sys.exit(0)
+
+    parser.print_help()
+    sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

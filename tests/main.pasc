@@ -1,0 +1,10 @@
+use functions.test as tst
+
+fun main():
+    echo("Hello from Pascaline!")
+    # Call the 'add' function from the test module
+    result = tst.add(5, 3)
+    echo("5 + 3 = " + str(result))
+
+if __name__ == '__main__':
+    main()

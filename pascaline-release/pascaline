@@ -1,0 +1,17 @@
+#!/bin/bash
+# pascaline.sh - Run Pascaline transpiler from src/main.py with full 
+argument passthrough
+
+# Ensure the script is running from the root of the project
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_EXEC="python3.12"
+MAIN_SCRIPT="$SCRIPT_DIR/src/main.py"
+
+# Check if Python 3.12 is available
+if ! command -v $PYTHON_EXEC &>/dev/null; then
+    echo "[Pascaline] Error: python3.12 not found in PATH."
+    exit 1
+fi
+
+# Execute main.py with all arguments passed through
+$PYTHON_EXEC "$MAIN_SCRIPT" "$@"

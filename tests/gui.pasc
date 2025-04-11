@@ -1,0 +1,16 @@
+use tkinter as tk
+
+fun create_window():
+    root = tk.Tk()
+    root.title("Pascaline Tkinter Test")
+    
+    label = tk.Label(root, text="Hello, Pascaline with Tkinter!")
+    label.pack(padx=20, pady=20)
+    
+    button = tk.Button(root, text="Close", command=root.destroy)
+    button.pack(padx=10, pady=10)
+    
+    root.mainloop()
+
+if __name__ == '__main__':
+    create_window()
