@@ -43,7 +43,7 @@ Pascaline is very similar to Python but introduces a few new keywords and syntax
   
   ```pascaline
   fun greet(name):
-      echo "Hello, " + name
+      echo("Hello, " + name)
   ```
 
 - **Imports**: Use `use` instead of `import`.
@@ -55,7 +55,7 @@ Pascaline is very similar to Python but introduces a few new keywords and syntax
 - **Print Statement**: Use `echo` instead of `print`.
 
   ```pascaline
-  echo "Hello, world!"
+  echo("Hello, world!")
   ```
 
 - **Return Statements**: Replace `=>` with `return` during transpilation, making the code more concise.
@@ -69,14 +69,14 @@ Here's a simple example written in Pascaline:
 ```pascaline
 fun factorial(n):
     if n == 0:
-        return 1
+        => 1
     else:
-        return n * factorial(n - 1)
+        => n * factorial(n - 1)
 
 fun main():
     number = 5
     result = factorial(number)
-    echo "Factorial of " + number + " is " + result
+    echo("Factorial of " + number + " is " + result)
 
 main()
 ```
@@ -96,11 +96,11 @@ If you encounter any issues or have suggestions, please open an issue in the rep
 
 ## License
 
-Pascaline is open-source and released under the MIT License. See the [LICENSE](LICENSE) file for more information.
+Pascaline is open-source and released under the GPL-3.0 License. See the [LICENSE](LICENSE) file for more information.
 
 ## Links
 
-Currently no links. Coming soon though
+[Website](https://diamsystems.odoo.com/pascaline)
 
 ---
 
