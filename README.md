@@ -55,7 +55,7 @@ Pascaline is very similar to Python but introduces a few new keywords and syntax
 - **Print Statement**: Use `echo` instead of `print`.
 
   ```pascaline
-  echo "Hello, world!"
+  echo("Hello, world!")
   ```
 
 - **Return Statements**: Replace `=>` with `return` during transpilation, making the code more concise.
@@ -69,14 +69,14 @@ Here's a simple example written in Pascaline:
 ```pascaline
 fun factorial(n):
     if n == 0:
-        return 1
+        => 1
     else:
-        return n * factorial(n - 1)
+        => n * factorial(n - 1)
 
 fun main():
     number = 5
     result = factorial(number)
-    echo "Factorial of " + number + " is " + result
+    echo("Factorial of " + number + " is " + result)
 
 main()
 ```
