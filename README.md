@@ -43,7 +43,7 @@ Pascaline is very similar to Python but introduces a few new keywords and syntax
   
   ```pascaline
   fun greet(name):
-      echo "Hello, " + name
+      echo("Hello, " + name)
   ```
 
 - **Imports**: Use `use` instead of `import`.
