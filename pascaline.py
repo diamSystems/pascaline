@@ -22,6 +22,13 @@ def ends_with(s, suffix):
     """Returns True if the string s ends with the suffix."""
     return s.endswith(suffix)
 
+def find(lst, condition):
+    """Finds the first item in a list that matches the condition."""
+    for item in lst:
+        if condition(item):
+            return item
+    return None
+
 def split(s, delimiter):
     """Splits the string s by the given delimiter."""
     return s.split(delimiter)
