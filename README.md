@@ -96,7 +96,7 @@ If you encounter any issues or have suggestions, please open an issue in the rep
 
 ## License
 
-Pascaline is open-source and released under the MIT License. See the [LICENSE](LICENSE) file for more information.
+Pascaline is open-source and released under the GPL-3.0 License. See the [LICENSE](LICENSE) file for more information.
 
 ## Links
 
